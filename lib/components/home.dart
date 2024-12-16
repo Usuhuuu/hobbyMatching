@@ -1,7 +1,7 @@
 import 'package:client/components/dashboard.dart';
 import 'package:client/models/categories.dart';
 import 'package:client/models/catergories_detail.dart';
-import 'package:flutter/foundation.dart';
+import 'package:client/widgets/bottomnavigator.dart';
 import 'package:flutter/material.dart';
 
 import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
@@ -21,17 +21,6 @@ class HomePage extends StatefulWidget {
     categoryDetail.addAll(CategoryDetail.getCategoryDetail());
   }
 
-  final List<TabItem> tabItems = List.of([
-    TabItem(Icons.home, "Home", Colors.blueAccent,
-        labelStyle: const TextStyle(fontWeight: FontWeight.normal)),
-    TabItem(Icons.search, "Search", Colors.blueAccent,
-        labelStyle:
-            const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-    TabItem(Icons.person, "Profile", Colors.blueAccent,
-        labelStyle:
-            const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-  ]);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -48,42 +37,25 @@ class _HomePageState extends State<HomePage> {
     //const SearchScreen(),
     const DashboardAndSignUp(),
   ];
-  final CircularBottomNavigationController _navigationController =
-      CircularBottomNavigationController(0);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: appBar(context),
-      body: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                catergorySection(), // This section will be pinned as part of the scroll
-                categoryDetails(), // This will scroll along with the content
-              ],
+        backgroundColor: Colors.white,
+        appBar: appBar(context),
+        body: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  catergorySection(), // This section will be pinned as part of the scroll
+                  categoryDetails(), // This will scroll along with the content
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: CircularBottomNavigation(
-        widget.tabItems,
-        controller: _navigationController,
-        selectedCallback: (selectedPosition) {
-          if (selectedPosition == 0) {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HomePage()));
-          } else if (selectedPosition == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const DashboardAndSignUp()),
-            );
-          }
-        },
-      ),
-    );
+          ],
+        ),
+        bottomNavigationBar: bottomNavigator(context));
   }
 
   AppBar appBar(BuildContext context) {
@@ -111,7 +83,7 @@ class _HomePageState extends State<HomePage> {
           builder: (context) {
             return GestureDetector(
               onTap: () {
-                ZoomDrawer.of(context)!.toggle();
+                ZoomDrawer.of(context)?.toggle();
               },
               child: const Padding(
                 padding: EdgeInsets.all(10),

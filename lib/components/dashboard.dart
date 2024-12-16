@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:client/widgets/bottomnavigator.dart';
 
 class DashboardAndSignUp extends StatefulWidget {
   const DashboardAndSignUp({super.key});
@@ -88,7 +89,7 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
       try {
         await AuthServices.signupUser(_email!, _password!);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Authentication successful")),
+          const SnackBar(content: Text("Authentication Success")),
         );
 
         setState(() {
@@ -211,6 +212,7 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
           ],
         ),
       ),
+      bottomNavigationBar: bottomNavigator(context),
     );
   }
 }

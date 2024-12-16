@@ -1,4 +1,3 @@
-import 'package:client/components/home.dart';
 import 'package:client/components/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';

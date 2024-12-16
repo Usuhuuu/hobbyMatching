@@ -1,3 +1,4 @@
+import 'package:client/components/dashboard.dart';
 import 'package:client/models/categories.dart';
 import 'package:client/models/catergories_detail.dart';
 import 'package:flutter/foundation.dart';
@@ -9,30 +10,48 @@ import 'package:flutter/rendering.dart';
 
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({super.key});
 
-  List<CategoriesModel> categories = [];
-  List<CategoryDetail> categoryDetail = [];
+  final List<CategoriesModel> categories = [];
+  final List<CategoryDetail> categoryDetail = [];
 
   void initializeData() {
-    categories = CategoriesModel.getCategories();
-    categoryDetail = CategoryDetail.getCategoryDetail();
+    categories.addAll(CategoriesModel.getCategories());
+    categoryDetail.addAll(CategoryDetail.getCategoryDetail());
   }
 
-  List<TabItem> tabItems = List.of([
+  final List<TabItem> tabItems = List.of([
     TabItem(Icons.home, "Home", Colors.blueAccent,
-        labelStyle: TextStyle(fontWeight: FontWeight.normal)),
+        labelStyle: const TextStyle(fontWeight: FontWeight.normal)),
     TabItem(Icons.search, "Search", Colors.blueAccent,
-        labelStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        labelStyle:
+            const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
     TabItem(Icons.person, "Profile", Colors.blueAccent,
-        labelStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        labelStyle:
+            const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
   ]);
 
   @override
-  Widget build(BuildContext context) {
-    initializeData();
+  _HomePageState createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.initializeData();
+  }
+
+  final List<Widget> screens = [
+    HomePage(),
+    //const SearchScreen(),
+    const DashboardAndSignUp(),
+  ];
+  final CircularBottomNavigationController _navigationController =
+      CircularBottomNavigationController(0);
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appBar(context),
@@ -49,9 +68,19 @@ class HomePage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: CircularBottomNavigation(
-        tabItems,
-        selectedCallback: (selectedPos) {
-          print("clicked on $selectedPos");
+        widget.tabItems,
+        controller: _navigationController,
+        selectedCallback: (selectedPosition) {
+          if (selectedPosition == 0) {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HomePage()));
+          } else if (selectedPosition == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DashboardAndSignUp()),
+            );
+          }
         },
       ),
     );
@@ -123,7 +152,7 @@ class HomePage extends StatelessWidget {
                 height: 100,
                 color: Colors.white,
                 child: ListView.separated(
-                    itemCount: categories.length,
+                    itemCount: widget.categories.length,
                     scrollDirection: Axis.horizontal,
                     separatorBuilder: (context, index) {
                       return const SizedBox(
@@ -151,12 +180,12 @@ class HomePage extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    categories[index].iconText,
+                                    widget.categories[index].iconText,
                                     size: 40,
                                     color: Colors.blueAccent,
                                   ),
                                   Text(
-                                    categories[index].name,
+                                    widget.categories[index].name,
                                     style: const TextStyle(
                                         color: Colors.blueAccent),
                                     textAlign: TextAlign.center,
@@ -197,9 +226,9 @@ class HomePage extends StatelessWidget {
                 mainAxisSpacing: 30, // Vertical spacing
                 childAspectRatio: 0.8, // Adjust to control item size
               ),
-              itemCount: categoryDetail.length,
+              itemCount: widget.categoryDetail.length,
               itemBuilder: (context, index) {
-                final item = categoryDetail[index];
+                final item = widget.categoryDetail[index];
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,

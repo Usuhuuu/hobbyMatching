@@ -4,10 +4,6 @@ import 'package:client/models/catergories_detail.dart';
 import 'package:client/widgets/bottomnavigator.dart';
 import 'package:flutter/material.dart';
 
-import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
-import 'package:circular_bottom_navigation/tab_item.dart';
-import 'package:flutter/rendering.dart';
-
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,15 +31,17 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> screens = [
     HomePage(),
     //const SearchScreen(),
-    const DashboardAndSignUp(),
+    DashboardAndSignUp(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: appBar(context),
-        body: CustomScrollView(
+      backgroundColor: Colors.white,
+      appBar: appBar(context),
+      body: SizedBox(
+        width: double.infinity, // Makes the container take up the full width
+        child: CustomScrollView(
           slivers: [
             SliverList(
               delegate: SliverChildListDelegate(
@@ -55,7 +53,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        bottomNavigationBar: bottomNavigator(context));
+      ),
+      bottomNavigationBar: bottomNavigator(context),
+    );
   }
 
   AppBar appBar(BuildContext context) {

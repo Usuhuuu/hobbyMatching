@@ -1,10 +1,7 @@
-// bottom_navigation.dart
-
 import 'package:circular_bottom_navigation/tab_item.dart';
 import 'package:client/components/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
-import 'package:client/components/home.dart';
 import 'package:client/components/dashboard.dart';
 
 // Global controller for the bottom navigation
@@ -16,11 +13,11 @@ final List<TabItem> tabItems = List.of([
   TabItem(Icons.home, "Home", Colors.blueAccent,
       labelStyle: const TextStyle(fontWeight: FontWeight.normal)),
   TabItem(Icons.search, "Search", Colors.blueAccent,
-      labelStyle:
-          const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+      labelStyle: const TextStyle(
+          color: Colors.blueAccent, fontWeight: FontWeight.bold)),
   TabItem(Icons.person, "Profile", Colors.blueAccent,
-      labelStyle:
-          const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+      labelStyle: const TextStyle(
+          color: Colors.blueAccent, fontWeight: FontWeight.bold)),
 ]);
 
 // Global function to generate the bottom navigator
@@ -28,6 +25,8 @@ CircularBottomNavigation bottomNavigator(BuildContext context) {
   return CircularBottomNavigation(
     tabItems,
     controller: navigationController,
+    barBackgroundColor: Colors.white,
+    normalIconColor: Colors.blueAccent,
     selectedCallback: (selectedPosition) {
       if (selectedPosition == 0) {
         Navigator.pushReplacement(
@@ -49,7 +48,7 @@ CircularBottomNavigation bottomNavigator(BuildContext context) {
       } else if (selectedPosition == 2) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const DashboardAndSignUp()),
+          MaterialPageRoute(builder: (context) => DashboardAndSignUp()),
         );
       }
     },

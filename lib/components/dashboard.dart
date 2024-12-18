@@ -10,7 +10,6 @@ import 'package:client/widgets/bottomnavigator.dart';
 import 'package:faker_dart/faker_dart.dart';
 import 'package:random_avatar/random_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class DashboardAndSignUp extends StatefulWidget {
@@ -30,15 +29,14 @@ class AuthServices {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       // Get the user's UID
-      String uid = userCredential.user!.uid;
+      final String uid = userCredential.user!.uid;
       String randomUsername =
           "${faker.animal.type()}${faker.datatype.hexaDecimal()}";
       String fakeFirstName = faker.name.firstName();
       String fakeLastName = faker.name.lastName();
       String hashedpasswrd = _hashPassword(password);
-      String fakePhoneNumber = faker.phoneNumber.phoneFormat();
+      String fakePhoneNumber = faker.phoneNumber.phoneNumber();
       String avatarUrl = RandomAvatarString('saytoonz');
-      print(avatarUrl);
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'email': email,
         'firstName': fakeFirstName,
@@ -76,7 +74,6 @@ class AuthServices {
   }
 
   static String _hashPassword(String password) {
-    // Generate a SHA-256 hash
     var bytes = utf8.encode(password);
     var digest = sha256.convert(bytes);
     return digest.toString();
@@ -98,6 +95,7 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
     super.initState();
     _authStateChanges = FirebaseAuth.instance.authStateChanges();
     _loadCachedUserData();
+    //print("cached data:$_cachedUserData");
   }
 
   Future<void> _loadCachedUserData() async {
@@ -106,35 +104,45 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
     if (cachedData != null) {
       _cachedUserData = jsonDecode(cachedData);
       setState(() {});
+    } else {
+      _cachedUserData = await fetchUserInfo();
     }
   }
 
   Future<Map<String, dynamic>> fetchUserInfo() async {
     if (_cachedUserData != null) {
-      return _cachedUserData!; // Return cached data if available
+      return _cachedUserData!;
     }
 
     String? uid = FirebaseAuth.instance.currentUser?.uid;
+    print("sda yma $uid");
     if (uid == null) {
       throw Exception("User is not authenticated");
     }
 
-    // Fetch user document from Firestore and exclude 'createdAt' if not needed
     DocumentSnapshot userDoc =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
+    print(userDoc.data());
     if (userDoc.exists) {
       Map<String, dynamic> userData =
           Map<String, dynamic>.from(userDoc.data() as Map<String, dynamic>);
 
       userData.remove('createdAt');
       userData.remove('password');
+
+      // Add uid to the user data
+      userData['uid'] = uid;
+
       _cachedUserData = userData;
+
+      // Save to SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('user_data', jsonEncode(userData));
 
       return userData;
     } else {
+      await FirebaseAuth.instance.signOut();
       throw Exception("User document does not exist");
     }
   }
@@ -281,44 +289,54 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20, top: 50),
                   child: Center(
-                    child: SvgPicture.string(
-                      '${_cachedUserData?['imageUrl']}',
-                      height: 100,
-                      width: 100,
+                    child: Column(
+                      children: [
+                        SvgPicture.string(
+                          '${_cachedUserData?['imageUrl']}',
+                          height: 100,
+                          width: 100,
+                        ),
+                        Text(
+                          'Welcome, ${_cachedUserData?['firstName']} ${_cachedUserData?['lastName']}',
+                          style: const TextStyle(
+                            color: Colors.blueAccent,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 Expanded(
                   child: ListView.separated(
-                    itemCount: profileComponents.length + 1, // Add 1 for Logout
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: profileComponents.length + 1,
                     itemBuilder: (context, index) {
                       if (index == profileComponents.length) {
                         return ListTile(
                           leading: const Icon(Icons.logout),
                           title: const Text("Logout"),
                           onTap: () async {
-                            try {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.remove('user_data');
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            await prefs.remove('user_data').then((result) {
+                              print("user cache deleted $result");
+                            }).catchError((err) {
+                              print('error on delete cache: $err');
+                              return null;
+                            });
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'You have successfully logged out.')),
-                              );
-                              await FirebaseAuth.instance.signOut();
-                              setState(() {
-                                _cachedUserData = null;
-                              });
-                            } catch (err) {
-                              print("Error clearing cache during logout: $err");
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Error occurred while logging out: $err')),
-                              );
-                            }
+                            setState(() {
+                              _cachedUserData = null;
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'You have successfully logged out.')),
+                            );
+                            await FirebaseAuth.instance.signOut();
                           },
                         );
                       }

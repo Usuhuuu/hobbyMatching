@@ -35,20 +35,35 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("Username: ${userInfo['userName']}",
-                      style: const TextStyle(fontSize: 18)),
-                  Text("Email: ${userInfo['email']}",
-                      style: const TextStyle(fontSize: 18)),
-                  Text("First Name: ${userInfo['firstName']}",
-                      style: const TextStyle(fontSize: 18)),
-                  Text("Last Name: ${userInfo['lastName']}",
-                      style: const TextStyle(fontSize: 18)),
-                  Text("Phone Number: ${userInfo['phoneNumber']}",
-                      style: const TextStyle(fontSize: 18)),
-                  Text("Role: ${userInfo['role']}",
-                      style: const TextStyle(fontSize: 18)),
+                  Flexible(child: Container(
+                    child: Builder(
+                      builder: (context) {
+                        // Filter and sort the data outside of the itemBuilder for better performance
+                        var filteredUserInfo = userInfo.entries
+                            .where((entry) =>
+                                entry.key != 'password' &&
+                                entry.key != 'imageUrl' &&
+                                entry.key != 'role')
+                            .toList()
+                          ..sort((a, b) => a.key.compareTo(b.key));
+
+                        return ListView.separated(
+                          itemCount: filteredUserInfo.length,
+                          itemBuilder: (context, index) {
+                            var key = filteredUserInfo[index].key;
+                            var value = filteredUserInfo[index].value;
+
+                            return ListTile(
+                              title: Text('$key: ${value.toString()}'),
+                            );
+                          },
+                          separatorBuilder: (context, index) => const Divider(),
+                        );
+                      },
+                    ),
+                  )),
                 ],
               ),
             );

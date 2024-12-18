@@ -318,25 +318,37 @@ class _DashboardAndSignUpState extends State<DashboardAndSignUp> {
                           leading: const Icon(Icons.logout),
                           title: const Text("Logout"),
                           onTap: () async {
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            await prefs.remove('user_data').then((result) {
-                              print("user cache deleted $result");
-                            }).catchError((err) {
-                              print('error on delete cache: $err');
-                              return null;
-                            });
+                            try {
+                              // Clear shared preferences
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.remove('user_data');
+                              print("User cache successfully deleted.");
 
-                            setState(() {
-                              _cachedUserData = null;
-                            });
+                              // Clear local state
+                              setState(() {
+                                _cachedUserData = null;
+                              });
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              // Sign out from Firebase
+                              await FirebaseAuth.instance.signOut();
+
+                              // Show success message
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('You have successfully logged out.'),
+                                ),
+                              );
+                            } catch (err) {
+                              print('Error during logout: $err');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
                                   content: Text(
-                                      'You have successfully logged out.')),
-                            );
-                            await FirebaseAuth.instance.signOut();
+                                      'An error occurred while logging out: $err'),
+                                ),
+                              );
+                            }
                           },
                         );
                       }

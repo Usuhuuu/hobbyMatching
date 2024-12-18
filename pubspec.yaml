@@ -75,6 +75,7 @@ flutter:
     - lib/assets/images/music.avif
     - lib/assets/images/collective.jpeg
     - lib/assets/images/games.avif
+    - lib/assets/icon/add-friend.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

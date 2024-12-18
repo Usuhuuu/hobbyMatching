@@ -14,7 +14,29 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   @override
   void initState() {
     super.initState();
-    _userInfo = UserCache().fetchUserInfo(); // Fetch cached user info
+    _fetchUserData();
+  }
+
+  /// Fetch user data from the cache
+  void _fetchUserData() {
+    setState(() {
+      _userInfo = UserCache().fetchUserInfo();
+    });
+  }
+
+  /// Clear cached user data and refetch
+  Future<void> _clearAndRefreshCache() async {
+    try {
+      await UserCache().clearUserData();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cache cleared. Refreshing data...')),
+      );
+      _fetchUserData(); // Refetch updated data
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error clearing cache: $e')),
+      );
+    }
   }
 
   @override
@@ -22,6 +44,12 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Info'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _clearAndRefreshCache, // Clear cache and refresh
+          ),
+        ],
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _userInfo, // Use the cached user info from UserCache
@@ -37,10 +65,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Flexible(child: Container(
+                  Flexible(
                     child: Builder(
                       builder: (context) {
-                        // Filter and sort the data outside of the itemBuilder for better performance
+                        // Filter and sort the data
                         var filteredUserInfo = userInfo.entries
                             .where((entry) =>
                                 entry.key != 'password' &&
@@ -63,7 +91,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         );
                       },
                     ),
-                  )),
+                  ),
                 ],
               ),
             );

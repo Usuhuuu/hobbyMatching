@@ -1,4 +1,5 @@
 import 'package:circular_bottom_navigation/tab_item.dart';
+import 'package:client/components/chat.dart';
 import 'package:client/components/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
@@ -19,7 +20,6 @@ final List<TabItem> tabItems = List.of([
       labelStyle: const TextStyle(
           color: Colors.blueAccent, fontWeight: FontWeight.bold)),
 ]);
-
 // Global function to generate the bottom navigator
 CircularBottomNavigation bottomNavigator(BuildContext context) {
   return CircularBottomNavigation(
@@ -48,7 +48,7 @@ CircularBottomNavigation bottomNavigator(BuildContext context) {
       } else if (selectedPosition == 2) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardAndSignUp()),
+          MaterialPageRoute(builder: (context) => const DashboardAndSignUp()),
         );
       }
     },

@@ -1,4 +1,6 @@
+import 'package:client/components/chat.dart';
 import 'package:client/components/dashboard.dart';
+import 'package:client/components/fetchUserInfo.dart';
 import 'package:client/models/categories.dart';
 import 'package:client/models/catergories_detail.dart';
 import 'package:client/widgets/bottomnavigator.dart';
@@ -22,16 +24,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late Future<Map<String, dynamic>?> _userInfo;
+
   @override
   void initState() {
     super.initState();
+    _userInfo = UserCache().fetchUserInfo();
+    _userInfo.then((userInfo) {
+      if (userInfo != null) {
+        print("${userInfo['email']} ${userInfo['uid']}");
+      }
+    });
     widget.initializeData();
   }
 
   final List<Widget> screens = [
     HomePage(),
     //const SearchScreen(),
-    DashboardAndSignUp(),
+    const DashboardAndSignUp(),
   ];
 
   @override
@@ -71,9 +81,34 @@ class _HomePageState extends State<HomePage> {
           return IconButton(
             color: Colors.white,
             iconSize: 25,
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.chat),
             onPressed: () {
-              Scaffold.of(context).openDrawer();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FutureBuilder<Map<String, dynamic>?>(
+                      future:
+                          _userInfo, // Replace this with the actual method fetching _userInfo
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (snapshot.hasData) {
+                          final userInfo = snapshot.data!;
+                          return ChatScreen(
+                            receiverUserEmail: userInfo['email'] ?? 'Unknown',
+                            receiverUserId: userInfo['uid'] ?? 'Unknown',
+                          );
+                        } else {
+                          return Center(
+                              child: Text('No user information available.'));
+                        }
+                      },
+                    ),
+                  ));
             },
           );
         },

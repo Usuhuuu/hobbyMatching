@@ -17,7 +17,6 @@ class UserCache {
     try {
       // Return in-memory cache if available
       if (_cachedUserData != null) {
-        print('Returning in-memory cache: $_cachedUserData');
         return _cachedUserData;
       }
 

@@ -47,6 +47,7 @@ class AuthServices {
         'createdAt': FieldValue.serverTimestamp(),
         'userName': randomUsername,
         'role': 'user',
+        'uid': FirebaseAuth.instance.currentUser?.uid,
       });
       return true;
     } on FirebaseAuthException catch (e) {

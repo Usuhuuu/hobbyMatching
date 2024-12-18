@@ -56,25 +56,26 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 .where('userName', isEqualTo: _sendingUserName)
                 .get();
 
-        print(userSnapshot.docs[0].data());
+        print("pisda${userSnapshot.docs[0].data()}");
+        print("sdas ${userSnapshot.docs[0].data()['uid']}");
 
         if (userSnapshot.docs.isNotEmpty) {
           DocumentSnapshot<Map<String, dynamic>> userDoc = userSnapshot.docs[0];
-          print(userDoc.data()?['uid']);
           DocumentSnapshot userFriendsSnapshot = await userFriends.get();
+          print("$_sendingUserName and $ownUserName");
           if (!userFriendsSnapshot.exists) {
             await userFriends.set({
-              'sentRequests': [ownUserName],
+              'sentRequests': [_sendingUserName],
             });
           } else {
             await userFriends.update({
-              'sentRequests': FieldValue.arrayUnion([ownUserName]),
+              'sentRequests': FieldValue.arrayUnion([_sendingUserName]),
             });
           }
 
           await FirebaseFirestore.instance
               .collection("user_friends")
-              .doc(userDoc.data()?['uid']) // Use the correct document ID here
+              .doc(userDoc.data()?['uid'])
               .set({
             'receivedRequests': FieldValue.arrayUnion([ownUserName]),
           }, SetOptions(merge: true));
